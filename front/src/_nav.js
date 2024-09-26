@@ -1,27 +1,39 @@
-import React from 'react';
-import CIcon from '@coreui/icons-react';
-import { cilSpeedometer, cilStar } from '@coreui/icons';
-import { CNavGroup, CNavItem } from '@coreui/react';
+import React from 'react'
+import CIcon from '@coreui/icons-react'
+import { cilFile, cilFolderOpen, cilHome } from '@coreui/icons'
+import { CNavGroup, CNavItem } from '@coreui/react'
 
 const _nav = [
   {
     component: CNavItem,
     name: 'Home',
-    to: '/',  // Update path to Home
-    icon: <CIcon icon={cilSpeedometer} customClassName="nav-icon" />,
+    to: '/',
+    icon: <CIcon icon={cilHome} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Dashboard',
-    to: '/dashboard',
-    icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
+    name: 'File',
+    to: '/file',
+    icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
   },
   {
     component: CNavItem,
-    name: 'Vulnerabilities',
-    to: '/vulnerabilities',
-    icon: <CIcon icon={cilStar} customClassName="nav-icon" />,
+    name: 'File Dashboard',
+    to: '/file/dashboard',
+    icon: <CIcon icon={cilFile} customClassName="nav-icon" />,
   },
-];
+  {
+    component: CNavItem,
+    name: 'Folder',
+    to: '/folder',
+    icon: <CIcon icon={cilFolderOpen} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Folder Dashboard',
+    to: '/folder/dashboard',
+    icon: <CIcon icon={cilFolderOpen} customClassName="nav-icon" />,
+  }
+]
 
-export default _nav;
+export default _nav
