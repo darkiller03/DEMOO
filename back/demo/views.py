@@ -11,7 +11,7 @@ from .serializers import VulnerabilitySerializer
 URL = "url"
 HEADERS = {
     "Content": "application/json",
-    "api-key": "urAPikey",
+    "api-key": "apikey",
 }
 
 @csrf_exempt

@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import File, Vulnerability
+from .models import File, Vulnerability, Folder
+
+@admin.register(Folder)
+class FolderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'foldername') 
+    search_fields = ('foldername',) 
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
