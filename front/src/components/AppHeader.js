@@ -128,9 +128,6 @@ const AppHeader = () => {
           </li>
         </CHeaderNav>
       </CContainer>
-      <CContainer className="px-4" fluid>
-        <AppBreadcrumb />
-      </CContainer>
     </CHeader>
   )
 }
