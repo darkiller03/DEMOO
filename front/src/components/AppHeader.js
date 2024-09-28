@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
+import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CContainer,
@@ -29,11 +29,14 @@ import { AppBreadcrumb } from './index'
 
 const AppHeader = () => {
   const headerRef = useRef()
+  const type = useParams()
   const { colorMode, setColorMode } = useColorModes('coreui-free-react-admin-template-theme')
-
+  const navigate = useNavigate()
   const dispatch = useDispatch()
   const sidebarShow = useSelector((state) => state.sidebarShow)
-
+  const location = useLocation()
+  const currentType = window.location.pathname.includes('file') ? 'file' : 'folder'
+  console.log('this is current type', currentType)
   useEffect(() => {
     document.addEventListener('scroll', () => {
       headerRef.current &&
@@ -41,6 +44,7 @@ const AppHeader = () => {
     })
   }, [])
 
+  // const Param = getActualUrl()
   return (
     <CHeader position="sticky" className="mb-4 p-0" ref={headerRef}>
       <CContainer className="border-bottom px-4" fluid>
@@ -52,12 +56,12 @@ const AppHeader = () => {
         </CHeaderToggler>
         <CHeaderNav className="d-none d-md-flex">
           <CNavItem>
-            <CNavLink to="/dashboard" as={NavLink}>
+            <CNavLink to={`${currentType}/dashboard`} as={NavLink}>
               Dashboard
             </CNavLink>
           </CNavItem>
           <CNavItem>
-            <CNavLink to="/vulnerabilities" as={NavLink}>
+            <CNavLink to={`${currentType}/vulnerabilities/dashboard`} as={NavLink}>
               Vulnerabilities
             </CNavLink>
           </CNavItem>

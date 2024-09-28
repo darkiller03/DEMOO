@@ -8,11 +8,12 @@ from rest_framework.response import Response
 from .models import File, Vulnerability
 from .serializers import VulnerabilitySerializer
 
-URL = "url"
+URL = "https://dlab-openai01.openai.azure.com/openai/deployments/Sofiene_First_Model4/chat/completions?api-version=2024-02-01"
 HEADERS = {
     "Content": "application/json",
-    "api-key": "urAPikey",
+    "api-key": "a6cf4102a24f48c5bc291262b5e886a9",
 }
+
 
 @csrf_exempt
 def analyze_code(request):
