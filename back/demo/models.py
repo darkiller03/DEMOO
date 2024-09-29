@@ -7,7 +7,7 @@ class Folder(models.Model):
         return self.foldername
 
 class File(models.Model):
-    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='files')
+    folder = models.ForeignKey(Folder, on_delete=models.CASCADE, related_name='files',null=True, blank=True)
     filename = models.CharField(max_length=255)
     filecontent = models.TextField()
 

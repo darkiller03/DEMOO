@@ -8,61 +8,66 @@ from rest_framework.response import Response
 from .models import File, Vulnerability
 from .serializers import VulnerabilitySerializer
 
-URL = ""
+URL = "https://dlab-openai01.openai.azure.com/openai/deployments/Sofiene_First_Model4/chat/completions?api-version=2024-02-01"
 HEADERS = {
     "Content": "application/json",
-    "api-key": "",
+    "api-key": "a6cf4102a24f48c5bc291262b5e886a9",
 }
-
 
 @csrf_exempt
 def analyze_code(request):
     print('marhbe ena executed')
     if request.method == 'POST':
         try:
+            print("Raw request body:", request.body)
             data = json.loads(request.body)
             file_content = data.get('code')
+            file_name = data.get('FileName')
+
             if not file_content:
                 return JsonResponse({"error": "No code provided"}, status=400)
 
-            file_name = data.get('FileName') # You can set a default file name or get it from the request if available
-            
             if File.objects.filter(filename=file_name).exists():
                 return JsonResponse({"error": "File with the same name already exists"}, status=409) 
             
             print(f"Uploaded file name: {file_name}")
 
+            # Prepare payload for external API
             payload = {
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a professional hacker that works on the source code to detect security code best practices, vulnerabilities and security functions in the code",
-            },
-            {
-                "role": "user",
-                "content": """Analyze the provided code for security vulnerabilities. For each identified vulnerability, provide the following information in JSON format:
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a professional hacker that works on the source code to detect security code best practices, vulnerabilities and security functions in the code",
+                    },
+                    {
+                        "role": "user",
+                        "content": """Analyze the provided code for security vulnerabilities. For each identified vulnerability, provide the following information in JSON format:
 
-                Vulnerability: The name of the vulnerability.
-                Description: A comprehensive description of the vulnerability, including how it can be exploited and its potential impact on the system.
-                Priority: The priority level of addressing this vulnerability (e.g., High, Medium, Low), based on factors such as exploitability and potential damage.
-                Risk: The risk level of the vulnerability (e.g., Critical, High, Medium, Low), indicating the severity and likelihood of exploitation.
-                Status: The current status of the vulnerability (e.g., Open, Closed, Resolved). If security measures are implemented to address the vulnerability, set the status to "Resolved".
-                CWE: The Common Weakness Enumeration identifier for the vulnerability, providing a reference to a specific category of weaknesses.
-                Recommendation: How to mitigate the vulnerability briefly.
-                Implemented Security Measures: The security code configuration or functions already implemented (e.g., parameterized queries for SQL, CSRF tokens, secure cookie flags, input validation, output encoding).
+                        Vulnerability: The name of the vulnerability.
+                        Description: A comprehensive description of the vulnerability, including how it can be exploited and its potential impact on the system.
+                        Priority: The priority level of addressing this vulnerability (e.g., High, Medium, Low), based on factors such as exploitability and potential damage.
+                        Risk: The risk level of the vulnerability (e.g., Critical, High, Medium, Low), indicating the severity and likelihood of exploitation.
+                        Status: The current status of the vulnerability (e.g., Open, Closed, Resolved). If security measures are implemented to address the vulnerability, set the status to "Resolved".
+                        CWE: The Common Weakness Enumeration identifier for the vulnerability, providing a reference to a specific category of weaknesses.
+                        Recommendation: How to mitigate the vulnerability briefly.
+                        Implemented Security Measures: The security code configuration or functions already implemented (e.g., parameterized queries for SQL, CSRF tokens, secure cookie flags, input validation, output encoding).
 
-                In addition to identifying vulnerabilities, provide a detailed analysis of the existing security measures in the code. If any security measures are already in place and fully mitigate the vulnerability, mark the status as "Resolved" and describe the security measures detected. If the security measures are insufficient, include the vulnerability and explain how it can be bypassed and what additional measures should be implemented to fully address it.
-                """,
-            },
-            {"role": "user", "content": file_content},
-        ],
-        "temperature": 0.5,
-        "top_p": 0.9,
-    }
+                        In addition to identifying vulnerabilities, provide a detailed analysis of the existing security measures in the code. If any security measures are already in place and fully mitigate the vulnerability, mark the status as "Resolved" and describe the security measures detected. If the security measures are insufficient, include the vulnerability and explain how it can be bypassed and what additional measures should be implemented to fully address it.
+                        """,
+                    },
+                    {"role": "user", "content": file_content},
+                ],
+                "temperature": 0.5,
+                "top_p": 0.9,
+            }
 
+            # Call external API
             response = requests.post(URL, headers=HEADERS, data=json.dumps(payload))
+            print("External API response:", response.text)  # Log the response
+
             if response.status_code == 404:
                 return JsonResponse({"error": "External API resource not found"}, status=404)
+
             result = response.json()
             if "choices" in result and len(result["choices"]) > 0:
                 message = result["choices"][0]["message"]["content"]
@@ -103,9 +108,15 @@ def analyze_code(request):
                 return JsonResponse({"error": "No vulnerabilities detected or response format is unexpected"}, status=500)
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
+        except Exception as e:
+            print(f"Unexpected error: {e}")  # Log unexpected errors
+            return JsonResponse({"error": "An unexpected error occurred"}, status=500)
     else:
         return JsonResponse({"error": "Invalid request method"}, status=405)
-    
+
+    # Ensure a response is returned in all cases
+    return JsonResponse({"error": "Unreachable code reached"}, status=500)
+
 
 @api_view(['PATCH'])
 def update_vulnerability_status(request, vulnerabilityId):
