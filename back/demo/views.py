@@ -19,7 +19,7 @@ def analyze_code(request):
     print('marhbe ena executed')
     if request.method == 'POST':
         try:
-            print("Raw request body:", request.body)
+            # print("Raw request body:", request.body)
             data = json.loads(request.body)
             file_content = data.get('code')
             file_name = data.get('FileName')
@@ -30,7 +30,7 @@ def analyze_code(request):
             if File.objects.filter(filename=file_name).exists():
                 return JsonResponse({"error": "File with the same name already exists"}, status=409) 
             
-            print(f"Uploaded file name: {file_name}")
+            # print(f"Uploaded file name: {file_name}")
 
             # Prepare payload for external API
             payload = {
@@ -63,7 +63,7 @@ def analyze_code(request):
 
             # Call external API
             response = requests.post(URL, headers=HEADERS, data=json.dumps(payload))
-            print("External API response:", response.text)  # Log the response
+            #print("External API response:", response.text)  # Log the response
 
             if response.status_code == 404:
                 return JsonResponse({"error": "External API resource not found"}, status=404)
