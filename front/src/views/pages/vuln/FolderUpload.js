@@ -7,56 +7,56 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
   const [files, setFiles] = useState([])
 
   const handleFileChange = (event) => {
-    setFiles(event.target.files) // This will contain all the files inside the folder
+    setFiles(event.target.files) // Store the files selected from folder
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    // Check if files are selected and log them
     if (!files.length) {
       console.error('No files selected')
       return
     }
 
-    // Convert the FileList to an array
     const validFiles = Array.from(files)
     console.log('Valid files:', validFiles)
 
-    const fileContents = []
+    const allVulnerabilities = []
     const promises = []
 
-    // Process each valid file
     for (const file of validFiles) {
-      // Check if the file is a valid Blob before processing
       if (file instanceof File) {
         const reader = new FileReader()
-        const promise = new Promise(async (resolve, reject) => {
+
+        const promise = new Promise((resolve, reject) => {
           reader.onload = async (e) => {
-            const content = e.target.result // Read the file content
-            fileContents.push({ name: file.name, content }) // Store file name and content
+            const content = e.target.result // Read file content
+            const fileName = file.name
 
             // Make API call for each file
             try {
-              setLoading(true) // Set loading state
+              setLoading(true) // Start loading
               const response = await axios.post(
                 'http://localhost:8000/api/analyze_code/',
-                { code: content, FileName: file.name },
-                {
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                },
+                { code: content, FileName: fileName },
+                { headers: { 'Content-Type': 'application/json' } }
               )
 
-              // Handle the API response if needed
-              console.log('API response for file:', file.name, response.data)
-              resolve() // Resolve promise when done
+              // Collect vulnerabilities for this file
+              const fileVulnerabilities = {
+                fileName: fileName,
+                vulnerabilities: response.data.Vulnerabilities || []
+              }
+
+              allVulnerabilities.push(fileVulnerabilities) // Add to the overall result
+              console.log(`API response for file: ${fileName}`, response.data)
+
+              resolve()
             } catch (error) {
-              console.error('Error uploading file:', file.name, error)
-              reject(error) // Reject promise if there's an error
+              console.error(`Error uploading file: ${fileName}`, error)
+              reject(error)
             } finally {
-              setLoading(false) // Reset loading state
+              setLoading(false) // End loading
             }
           }
 
@@ -66,20 +66,18 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
           }
         })
 
-        reader.readAsText(file) // Read the file as text
+        reader.readAsText(file)
         promises.push(promise)
       } else {
         console.error('Invalid file:', file)
       }
     }
 
-    // Wait for all files to be processed
+    // Wait for all file uploads to complete
     try {
       await Promise.all(promises)
-      console.log('Uploaded file contents:', fileContents)
-      if (onFolderUpload) {
-        onFolderUpload(fileContents) // Pass the contents to the parent component if needed
-      }
+      console.log('All vulnerabilities:', allVulnerabilities)
+      onFolderUpload(allVulnerabilities) // Pass the vulnerabilities data to the parent component
     } catch (error) {
       console.error('Error processing files:', error)
     }
@@ -88,7 +86,11 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-        <input type="file" webkitdirectory="true" dir="true" onChange={handleFileChange} />
+        <input
+          type="file"
+          webkitdirectory="true"
+          onChange={handleFileChange}
+        />
         <button type="submit">Upload</button>
       </form>
     </div>
