@@ -17,7 +17,8 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
       console.error('No files selected')
       return
     }
-
+    const folderName = files[0].webkitRelativePath.split('/')[0];
+ 
     const validFiles = Array.from(files)
     console.log('Valid files:', validFiles)
 
@@ -38,10 +39,9 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
               setLoading(true) // Start loading
               const response = await axios.post(
                 'http://localhost:8000/api/analyze_code/',
-                { code: content, FileName: fileName },
+                { code: content, FileName: fileName, FolderName: folderName },
                 { headers: { 'Content-Type': 'application/json' } }
               )
-
               // Collect vulnerabilities for this file
               const fileVulnerabilities = {
                 fileName: fileName,
@@ -77,7 +77,8 @@ const FolderUpload = ({ onFolderUpload, setLoading }) => {
     try {
       await Promise.all(promises)
       console.log('All vulnerabilities:', allVulnerabilities)
-      onFolderUpload(allVulnerabilities) // Pass the vulnerabilities data to the parent component
+      console.log("hedha el folder name 9bal mayetb3ath mel FolderUpload",folderName);
+      onFolderUpload(allVulnerabilities,folderName) // Pass the vulnerabilities data to the parent component
     } catch (error) {
       console.error('Error processing files:', error)
     }

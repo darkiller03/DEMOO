@@ -21,8 +21,10 @@ const Dashboard = () => {
   const [vulnerabilities, setVulnerabilities] = useState([])
   const [error, setError] = useState(null)
   const fileName = useSelector((state) => state.fileName) || 'Unknown Filename'
+  const folderName = useSelector((state)=> state.folderName ) || 'Unknown Foldername'
 
   // Fetch vulnerabilities from the API
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,6 +43,26 @@ const Dashboard = () => {
     }
   }, [fileName])
 
+  // Fetch vulnerabilities from the API by folderName
+  useEffect(() => {
+    const fetchDataByFolder = async () => {
+      try {
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/vulnerabilities/folder/${encodeURIComponent(folderName)}/`
+        )
+        console.log("hedha el return mta3 el vulns by fodlername",response.data)
+        setVulnerabilities(response.data)
+      } catch (error) {
+        setError('Error fetching vulnerabilities by folder')
+        console.error('There was an error!', error)
+      }
+    }
+
+    if (folderName !== 'Unknown Foldername') {
+      fetchDataByFolder()
+    }
+  }, [folderName])
+  
   // Calculate statistics
   const totalVulnerabilities = vulnerabilities.length
   const resolvedCount = vulnerabilities.filter((v) => v.status === 'Resolved').length
@@ -52,7 +74,7 @@ const Dashboard = () => {
 
   // Filter open vulnerabilities
   const openVulnerabilities = vulnerabilities.filter((v) => v.status !== 'Resolved')
-
+  
   // Handle status change for vulnerabilities
   const handleStatusChange = async (e, vulnerabilityId) => {
     const newStatus = e.target.value
@@ -149,6 +171,7 @@ const Dashboard = () => {
                         </CTableRow>
                       </CTableHead>
                       <CTableBody>
+                        
                         {openVulnerabilities.map((item, index) => (
                           <CTableRow key={index}>
                             <CTableDataCell className="text-center">{item.vulnerability}</CTableDataCell>
@@ -165,6 +188,7 @@ const Dashboard = () => {
                             </CTableDataCell>
                           </CTableRow>
                         ))}
+
                       </CTableBody>
                     </CTable>
                   </CCardBody>

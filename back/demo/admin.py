@@ -8,8 +8,9 @@ class FolderAdmin(admin.ModelAdmin):
 
 @admin.register(File)
 class FileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'filename', 'filecontent')
+    list_display = ('id', 'filename', 'filecontent','folder')
     search_fields = ('filename',)
+    list_filter = ('folder',)
 
 @admin.register(Vulnerability)
 class VulnerabilityAdmin(admin.ModelAdmin):

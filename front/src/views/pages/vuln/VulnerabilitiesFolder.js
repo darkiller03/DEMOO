@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import FolderUpload from './FolderUpload'
 import Spinner from './Spinner'
-
+import {  useDispatch } from 'react-redux'
 const VulnerabilitiesFolder = () => {
   const [vulnerabilities, setVulnerabilities] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-
+  const dispatch = useDispatch()
   // Define the toggleDetails function
   const toggleDetails = (id) => {
     const detailsElement = document.getElementById(id)
@@ -22,8 +22,9 @@ const VulnerabilitiesFolder = () => {
     }
   }
 
-  const handleFolderUpload = (vulnerabilitiesData) => {
+  const handleFolderUpload = (vulnerabilitiesData,folderName) => {
     setVulnerabilities(vulnerabilitiesData)
+    dispatch({ type: 'AddData', data: { vuln:vulnerabilitiesData,folderName } })
   }
 
   return (

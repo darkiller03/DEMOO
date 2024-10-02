@@ -1,11 +1,12 @@
 import json
 import requests
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import File, Vulnerability
+from .models import File, Vulnerability , Folder
 from .serializers import VulnerabilitySerializer
 
 URL = "url"
@@ -23,7 +24,7 @@ def analyze_code(request):
             data = json.loads(request.body)
             file_content = data.get('code')
             file_name = data.get('FileName')
-
+            folder_name = data.get('FolderName')
             if not file_content:
                 return JsonResponse({"error": "No code provided"}, status=400)
 
@@ -80,22 +81,24 @@ def analyze_code(request):
                         vulnerabilities_data = json.loads(json_content)
                         
                         file_instance = File.objects.create(
+                            folder=folder_name,
                             filename=file_name,
                             filecontent=file_content
                         )
                         
                         # Create the Vulnerability instances
                         for vuln_data in vulnerabilities_data:
-                            Vulnerability.objects.create(
-                                file=file_instance,  # Associate vulnerability with the file
-                                vulnerability=vuln_data.get("Vulnerability"),
-                                status=vuln_data.get("Status"),
-                                risk=vuln_data.get("Risk"),
-                                recommendation=vuln_data.get("Recommendation"),
-                                implemented_measures=vuln_data.get("Implemented Security Measures"),
-                                description=vuln_data.get("Description"),
-                                priority=vuln_data.get("Priority"),
-                                cwe=vuln_data.get("CWE")
+                            if(isinstance(vuln_data,dict)) :
+                                Vulnerability.objects.create(
+                                    file=file_instance,  # Associate vulnerability with the file
+                                    vulnerability=vuln_data.get("Vulnerability"),
+                                    status=vuln_data.get("Status"),
+                                    risk=vuln_data.get("Risk"),
+                                    recommendation=vuln_data.get("Recommendation"),
+                                    implemented_measures=vuln_data.get("Implemented Security Measures"),
+                                    description=vuln_data.get("Description"),
+                                    priority=vuln_data.get("Priority"),
+                                    cwe=vuln_data.get("CWE")
                             )
 
                         return JsonResponse({"Vulnerabilities": vulnerabilities_data}, status=200)
@@ -168,6 +171,48 @@ def get_vulnerabilities_by_filename(request, fileName):
         # Serialize the vulnerabilities
         serializer = VulnerabilitySerializer(vulnerabilities, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+@api_view(['GET'])
+def get_vulnerabilities_by_foldername(request, folderName):
+    try:
+        # Print the folder name for debugging purposes
+        print("This is the folder name:", folderName)
+        
+        # Retrieve all files associated with the folder name
+        files = File.objects.filter(folder=folderName)
+        
+        # Initialize a dictionary to hold the vulnerabilities for each file
+        folder_vulnerabilities = {}
+        
+        # Iterate over each file and retrieve its vulnerabilities
+        for file in files:
+            # Print the file name for debugging purposes
+            print("This is the file name:", file.filename)
+            
+            # Retrieve vulnerabilities associated with the file
+            vulnerabilities = Vulnerability.objects.filter(file=file)
+            
+            # Print the found vulnerabilities for debugging purposes
+            print("These are the found vulnerabilities for file:", file.filename, vulnerabilities)
+            
+            # Serialize the vulnerabilities
+            serializer = VulnerabilitySerializer(vulnerabilities, many=True)
+            
+            # Add the serialized vulnerabilities to the dictionary
+            folder_vulnerabilities[file.filename] = serializer.data
+        
+        # If no vulnerabilities are found, return a 404 error
+        if not folder_vulnerabilities:
+            return Response({'error': 'No vulnerabilities found for the specified folder'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response(folder_vulnerabilities, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        # Print the exception for debugging purposes
+        print("An error occurred:", str(e))
+        return Response({'error': 'An unexpected error occurred'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
