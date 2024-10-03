@@ -33,10 +33,10 @@ const Home = () => {
       >
         <Box>
           <Typography variant="h2" sx={{ fontWeight: 'bold' }}>
-            Secure Your Code with AI & Best Practices
+            Secure Your Code <br></br>with Our Team.
           </Typography>
           <Typography variant="h6" sx={{ marginTop: '1rem', opacity: 0.8 }}>
-            AI-driven security analysis to keep your application safe from vulnerabilities.
+            AI-driven security analysis <br></br>to keep your application safe from vulnerabilities.
           </Typography>
           <Button
             variant="contained"
@@ -67,23 +67,6 @@ const Home = () => {
         </Typography>
       </Box>
 
-      {/* OpenAI API Section */}
-      <Box sx={{ 
-          padding: '4rem 0', 
-          textAlign: 'center', 
-          border: '7px solid #212631', 
-          maxWidth: '800px', 
-          margin: '30px auto 0 auto', // Adds 30px top margin
-          borderRadius: '8px' 
-      }}>
-        <Typography variant="h4" gutterBottom>
-          OpenAI API Integration
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '700px', margin: 'auto' }}>
-          We use OpenAI’s API to provide smart and efficient code analysis. Our AI-powered system identifies risks in
-          real-time, allowing you to focus on building, not debugging.
-        </Typography>
-      </Box>
 
       {/* Pricing Plans */}
       <Box sx={{ padding: '4rem 0', backgroundColor: '#f4f5f7', textAlign: 'center' }}>
