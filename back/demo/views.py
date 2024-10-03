@@ -8,11 +8,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import File, Vulnerability , Folder
 from .serializers import VulnerabilitySerializer
+from decouple import config
 
-URL = "url"
+URL = config('API_URL')
 HEADERS = {
     "Content": "application/json",
-    "api-key": "apikey",
+    "api-key": config('API_KEY'),
 }
 
 @csrf_exempt
