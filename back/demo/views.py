@@ -9,10 +9,10 @@ from rest_framework.response import Response
 from .models import File, Vulnerability , Folder
 from .serializers import VulnerabilitySerializer
 
-URL = "https://dlab-openai01.openai.azure.com/openai/deployments/Sofiene_First_Model4/chat/completions?api-version=2024-02-01"
+URL = "url"
 HEADERS = {
     "Content": "application/json",
-    "api-key": "a6cf4102a24f48c5bc291262b5e886a9",
+    "api-key": "apikey",
 }
 
 @csrf_exempt
